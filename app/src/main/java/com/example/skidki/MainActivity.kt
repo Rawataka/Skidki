@@ -20,6 +20,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -77,6 +78,19 @@ fun DemoScreen(modifier: Modifier = Modifier) {
     var order by remember { mutableStateOf("") }
     var dishCount by remember { mutableStateOf("") }
     var sliderPosition by remember { mutableFloatStateOf(0f) }
+    var sale by remember { mutableIntStateOf(0) }
+
+    // Функция для расчета скидки на основе количества блюд
+    val calculateAutoSale = {
+        val count = dishCount.toIntOrNull() ?: 0
+        sale = when {
+            count >= 10 -> 10
+            count >= 6 -> 7
+            count >= 3 -> 5
+            count >= 1 -> 3
+            else -> 0
+        }
+    }
 
     val handlePositionChange = { position: Float ->
         sliderPosition = position
@@ -107,7 +121,10 @@ fun DemoScreen(modifier: Modifier = Modifier) {
             )
             TextField(
                 value = order,
-                onValueChange = { order = it },
+                onValueChange = {
+                    order = it
+                    calculateAutoSale()
+                },
                 modifier = Modifier.width(190.dp)
             )
         }
@@ -126,7 +143,10 @@ fun DemoScreen(modifier: Modifier = Modifier) {
             )
             TextField(
                 value = dishCount,
-                onValueChange = { dishCount = it },
+                onValueChange = {
+                    dishCount = it
+                    calculateAutoSale()
+                },
                 modifier = Modifier.width(150.dp)
             )
         }
@@ -142,6 +162,14 @@ fun DemoScreen(modifier: Modifier = Modifier) {
         Text(
             style = MaterialTheme.typography.headlineMedium,
             text = "${sliderPosition.toInt()}%"
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Отображение текущей скидки
+        Text(
+            text = "Текущая скидка: $sale%",
+            fontSize = 18.sp
         )
     }
 }
