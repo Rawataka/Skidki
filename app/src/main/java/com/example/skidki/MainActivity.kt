@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -79,16 +80,19 @@ fun DemoScreen(modifier: Modifier = Modifier) {
     var dishCount by remember { mutableStateOf("") }
     var sliderPosition by remember { mutableFloatStateOf(0f) }
     var sale by remember { mutableIntStateOf(0) }
+    var isManualSale by remember { mutableStateOf(false) }
 
     // Функция для расчета скидки на основе количества блюд
     val calculateAutoSale = {
-        val count = dishCount.toIntOrNull() ?: 0
-        sale = when {
-            count >= 10 -> 10
-            count >= 6 -> 7
-            count >= 3 -> 5
-            count >= 1 -> 3
-            else -> 0
+        if (!isManualSale) {
+            val count = dishCount.toIntOrNull() ?: 0
+            sale = when {
+                count >= 10 -> 10
+                count >= 6 -> 7
+                count >= 3 -> 5
+                count >= 1 -> 3
+                else -> 0
+            }
         }
     }
 
@@ -166,10 +170,38 @@ fun DemoScreen(modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Отображение текущей скидки
+        // Радиокнопки для ручного выбора скидки
         Text(
-            text = "Текущая скидка: $sale%",
-            fontSize = 18.sp
+            text = "Скидка:",
+            fontSize = 22.sp
         )
+
+        val discountOptions = listOf(3, 5, 7, 10)
+
+        // Горизонтальный ряд для радиокнопок
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            discountOptions.forEach { option ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = sale == option,
+                        onClick = {
+                            sale = option
+                            isManualSale = true
+                        }
+                    )
+                    Text(
+                        text = "$option%",
+                        fontSize = 15.sp,
+                        modifier = Modifier.padding(start = 1.dp, end = 10.dp)
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
