@@ -55,6 +55,7 @@ fun DemoTextPreview() {
 @Composable
 fun DemoScreen(modifier: Modifier = Modifier) {
     var order by remember { mutableStateOf("") }
+    var dishCount by remember { mutableStateOf("") }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -83,6 +84,25 @@ fun DemoScreen(modifier: Modifier = Modifier) {
                 value = order,
                 onValueChange = { order = it },
                 modifier = Modifier.width(190.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Количество блюд
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.align(Alignment.Start)
+        ) {
+            Text(
+                text = "Количество блюд:",
+                fontSize = 22.sp,
+                modifier = Modifier.width(150.dp)
+            )
+            TextField(
+                value = dishCount,
+                onValueChange = { dishCount = it },
+                modifier = Modifier.width(150.dp)
             )
         }
     }
