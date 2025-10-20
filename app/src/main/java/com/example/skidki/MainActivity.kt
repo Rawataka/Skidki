@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -76,23 +77,27 @@ fun DemoSlider(sliderPosition: Float, onPositionChange: (Float) -> Unit) {
 
 @Composable
 fun DemoScreen(modifier: Modifier = Modifier) {
+    var sliderPosition by remember { mutableFloatStateOf(0f) }
     var order by remember { mutableStateOf("") }
     var dishCount by remember { mutableStateOf("") }
-    var sliderPosition by remember { mutableFloatStateOf(0f) }
     var sale by remember { mutableIntStateOf(0) }
-    var isManualSale by remember { mutableStateOf(false) }
+
+    // Расчет итоговых сумм
+    val orderCheck = order.toDoubleOrNull() ?: 0.0
+    val saleAmount = orderCheck * sale / 100
+    val finalCheck = orderCheck - saleAmount
+    val tipsAmount = finalCheck * sliderPosition / 100
+    val totalAmount = finalCheck + tipsAmount
 
     // Функция для расчета скидки на основе количества блюд
     val calculateAutoSale = {
-        if (!isManualSale) {
-            val count = dishCount.toIntOrNull() ?: 0
-            sale = when {
-                count >= 10 -> 10
-                count >= 6 -> 7
-                count >= 3 -> 5
-                count >= 1 -> 3
-                else -> 0
-            }
+        val count = dishCount.toIntOrNull() ?: 0
+        sale = when {
+            count > 10 -> 10  // более 10 блюд – 10%
+            count >= 6 -> 7   // 6-10 блюд – 7%
+            count >= 3 -> 5   // 3-5 блюд – 5%
+            count >= 1 -> 3   // 1-2 блюда – 3%
+            else -> 0
         }
     }
 
@@ -157,7 +162,7 @@ fun DemoScreen(modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Слайдер для чаевых
+        // Слайдер для чаевых (0-25%)
         DemoSlider(
             sliderPosition = sliderPosition,
             onPositionChange = handlePositionChange
@@ -170,7 +175,7 @@ fun DemoScreen(modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Радиокнопки для ручного выбора скидки
+        // Радиокнопки для отображения автоматически рассчитанной скидки
         Text(
             text = "Скидка:",
             fontSize = 22.sp
@@ -178,7 +183,7 @@ fun DemoScreen(modifier: Modifier = Modifier) {
 
         val discountOptions = listOf(3, 5, 7, 10)
 
-        // Горизонтальный ряд для радиокнопок
+        // Горизонтальный ряд для радиокнопок (только отображение, без возможности выбора)
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -188,10 +193,7 @@ fun DemoScreen(modifier: Modifier = Modifier) {
                 ) {
                     RadioButton(
                         selected = sale == option,
-                        onClick = {
-                            sale = option
-                            isManualSale = true
-                        }
+                        onClick = null  // Отключаем возможность ручного выбора
                     )
                     Text(
                         text = "$option%",
@@ -202,6 +204,34 @@ fun DemoScreen(modifier: Modifier = Modifier) {
             }
         }
 
+        // Подпись с объяснением расчета скидки
+        Text(
+            text = when (sale) {
+                10 -> "Более 10 блюд - скидка 10%"
+                7 -> "6-10 блюд - скидка 7%"
+                5 -> "3-5 блюд - скидка 5%"
+                3 -> "1-2 блюда - скидка 3%"
+                else -> "Нет блюд - скидка 0%"
+            },
+            fontSize = 14.sp,
+            modifier = Modifier.padding(top = 8.dp)
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Отображение только итоговой суммы
+        Text(
+            text = "Итоговая сумма:",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold
+        )
+
         Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "${"%.2f".format(totalAmount)}",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
